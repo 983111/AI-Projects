@@ -1,0 +1,33 @@
+{
+  "project_info": {
+    "project_number": "47983194398",
+    "project_id": "styfi-8014b",
+    "storage_bucket": "styfi-8014b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:47983194398:android:420c561adad69d34c8d90f",
+        "android_client_info": {
+          "package_name": "com.example.styfi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHRfxo5xnIQnLrlbXtF8wML89PTfZspGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+<<<<<<< HEAD
+}
+=======
+}
+>>>>>>> 9b3456e6285ce023c13c7915bd9d5a11a4f51582

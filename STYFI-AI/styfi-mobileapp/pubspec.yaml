@@ -1,0 +1,44 @@
+name: styfi
+description: A Flutter project
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+<<<<<<< HEAD
+  # Firebase Bundle
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4
+  cloud_firestore: ^6.1.2
+  firebase_storage: ^13.0.6  # This is REQUIRED for uploads
+  
+  http: ^1.2.0
+  image_picker: ^1.0.7
+  cached_network_image: ^3.4.1
+  google_fonts: ^8.0.0
+=======
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4
+  cloud_firestore: ^6.1.2
+  
+  http: ^1.2.0
+  
+  image_picker: ^1.0.7
+  cached_network_image: ^3.4.1
+  google_fonts: ^8.0.0
+  
+>>>>>>> 9b3456e6285ce023c13c7915bd9d5a11a4f51582
+  flutter_launcher_icons: ^0.14.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
