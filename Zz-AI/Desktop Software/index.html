@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Zz Voice OS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+*,::before,::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'DM Sans',sans-serif;background:#f0ede8}
+:root{
+  --bg:#f0ede8;--w:#fff;--b:#e6e2dc;--b2:#cdc9c0;
+  --t:#17160f;--t2:#6a6760;--t3:#a9a79f;
+  --gold:#b8862e;--grn:#2a7d46;--red:#b53030;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+  --sh2:0 8px 30px rgba(0,0,0,.12);--r:12px;
+}
+
+/* ── TITLEBAR ── */
+#tb{position:fixed;top:0;left:0;right:0;height:40px;background:#fff;border-bottom:1px solid var(--b);display:flex;align-items:center;z-index:100;-webkit-app-region:drag}
+.tb-logo{width:60px;display:flex;justify-content:center;-webkit-app-region:no-drag}
+.tb-logo span{width:26px;height:26px;background:var(--t);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:#fff}
+.tb-mid{flex:1;text-align:center;font-size:13px;font-weight:500;color:var(--t2);pointer-events:none}
+.tb-btns{-webkit-app-region:no-drag;display:flex;gap:7px;padding-right:16px}
+.tb-btns button{width:13px;height:13px;border-radius:50%;border:none;cursor:pointer}
+.c1{background:#ff5f57}.c2{background:#febc2e}.c3{background:#28c840}
+
+/* ── SIDEBAR ── */
+#nav{position:fixed;top:40px;left:0;bottom:0;width:60px;background:#fff;border-right:1px solid var(--b);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;z-index:90;visibility:hidden}
+.ni{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent;border:none;color:var(--t3);transition:all .15s;position:relative}
+.ni:hover{background:var(--bg);color:var(--t2)}.ni.on{background:var(--t);color:#fff}
+.ni svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ni[title]:hover::after{content:attr(title);position:absolute;left:calc(100% + 10px);top:50%;transform:translateY(-50%);background:var(--t);color:#fff;font-size:11px;padding:4px 10px;border-radius:6px;white-space:nowrap;z-index:999;pointer-events:none}
+.nspc{flex:1}
+#dot{width:8px;height:8px;border-radius:50%;background:var(--t3);margin-bottom:12px;transition:all .3s}
+#dot.on{background:var(--grn);box-shadow:0 0 0 3px rgba(42,125,70,.15)}
+#dot.off{background:var(--red)}
+
+/* ── MAIN CONTENT ── */
+#main{position:fixed;top:40px;left:60px;right:0;bottom:0;overflow:hidden}
+.pg{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+.pg.on{display:flex}
+.psc{flex:1;overflow-y:auto;padding:24px 28px;min-height:0}
+.psc::-webkit-scrollbar{width:4px}
+.psc::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.pgt{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--t);margin-bottom:3px}
+.pgs{font-size:13px;color:var(--t2);margin-bottom:18px}
+.lbl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+.card{background:#fff;border:1px solid var(--b);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.inp{width:100%;background:#faf8f5;border:1.5px solid var(--b);border-radius:9px;padding:10px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--t);outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--t);background:#fff}
+.inp::placeholder{color:var(--t3)}
+.btn{padding:10px 18px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-d{background:var(--t);color:#fff}.btn-d:hover{background:#2d2c22}.btn-d:disabled{opacity:.45;cursor:not-allowed}
+.btn-sm{padding:7px 13px;font-size:13px;border-radius:8px}
+.btn-o{background:transparent;border:1.5px solid var(--b);color:var(--t2)}.btn-o:hover{border-color:var(--t);color:var(--t);background:#fff}
+.btn-r{background:transparent;border:1.5px solid rgba(181,48,48,.3);color:var(--red)}.btn-r:hover{background:rgba(181,48,48,.06)}
+
+/* ── AUTH ── */
+#pg-auth{align-items:center;justify-content:center;background:var(--bg)}
+.auth-box{background:#fff;border:1px solid var(--b);border-radius:20px;padding:40px;width:380px;box-shadow:var(--sh2);text-align:center}
+.auth-ico{width:50px;height:50px;background:var(--t);border-radius:13px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:16px;color:#fff;margin:0 auto 20px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.auth-box h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;margin-bottom:7px}
+.auth-box p{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:24px}
+.auth-box .inp{margin-bottom:10px}
+.auth-note{font-size:12px;color:var(--t3);margin-top:12px}
+.auth-note a{color:var(--gold);text-decoration:none;font-weight:500}
+
+/* ── DASHBOARD ── */
+.dash-layout{display:grid;grid-template-columns:1fr 250px;gap:16px}
+.vc{background:#fff;border:1px solid var(--b);border-radius:var(--r);box-shadow:var(--sh);padding:24px;display:flex;flex-direction:column;align-items:center}
+.mic-wrap{position:relative;width:100px;height:100px;margin-bottom:14px}
+.ring{position:absolute;border-radius:50%;border:1.5px solid rgba(184,134,46,.2);opacity:0;animation:rp 3s ease-out infinite}
+.ring:nth-child(1){inset:0}.ring:nth-child(2){inset:-14px;animation-delay:.9s}.ring:nth-child(3){inset:-28px;animation-delay:1.8s}
+@keyframes rp{0%{opacity:0;transform:scale(.9)}35%{opacity:.7}100%{opacity:0;transform:scale(1.1)}}
+.mic-wrap.live .ring{animation:rpl .8s ease-out infinite;border-color:rgba(184,134,46,.5)}
+@keyframes rpl{0%{opacity:0;transform:scale(.93)}40%{opacity:1}100%{opacity:0;transform:scale(1.07)}}
+#micbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:50%;background:var(--t);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,0,0,.2);transition:all .2s}
+#micbtn:hover{transform:translate(-50%,-50%) scale(1.06)}
+#micbtn svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#micbtn.live{background:var(--gold);animation:mg 1s ease-in-out infinite}
+@keyframes mg{0%,100%{box-shadow:0 4px 18px rgba(184,134,46,.4)}50%{box-shadow:0 4px 28px rgba(184,134,46,.7)}}
+#mlbl{font-size:13px;font-weight:500;color:var(--t2);margin-bottom:3px;text-align:center}
+#mtx{font-size:11px;color:var(--t3);text-align:center;min-height:15px;font-style:italic}
+.vd{width:100%;height:1px;background:var(--b);margin:16px 0}
+
+/* ── COMMAND BAR ── */
+.cmd-row{width:100%;display:flex;gap:7px;margin-bottom:8px}
+.cmd-i{flex:1;background:#faf8f5;border:1.5px solid var(--b);border-radius:9px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--t);outline:none;transition:border-color .15s}
+.cmd-i:focus{border-color:var(--t);background:#fff}
+.cmd-i::placeholder{color:var(--t3)}
+.run-btn{padding:9px 16px;background:var(--t);color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;white-space:nowrap;transition:all .15s}
+.run-btn:hover{background:#2d2c22}.run-btn:disabled{opacity:.45;cursor:not-allowed}
+.stop-btn{padding:9px 14px;background:var(--red);color:#fff;border:none;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;display:none;white-space:nowrap}
+
+/* ── BROWSER STATUS BAR ── */
+.brow-bar{width:100%;display:flex;align-items:center;gap:8px;padding:7px 12px;background:#faf8f5;border:1px solid var(--b);border-radius:9px;margin-bottom:8px;font-size:12px}
+.brow-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:all .3s}
+.brow-dot.ready{background:var(--grn)}.brow-dot.busy{background:var(--gold);animation:pulse .8s ease-in-out infinite}
+.brow-url{flex:1;font-family:'DM Mono',monospace;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t3)}
+.brow-btn{font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;padding:3px 9px;border-radius:5px;border:1px solid var(--b);background:#fff;font-family:'DM Sans',sans-serif}
+.brow-btn:hover{border-color:var(--t);color:var(--t)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── AUTOMATION PANEL ── */
+#auto-panel{width:100%;display:none;margin-bottom:10px;border:1px solid var(--b);border-radius:10px;overflow:hidden;background:#fff;box-shadow:var(--sh)}
+#auto-panel.show{display:block}
+.ap-head{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:#faf8f5;border-bottom:1px solid var(--b)}
+.ap-title{font-size:11px;font-weight:600;font-family:'DM Mono',monospace;color:var(--t);letter-spacing:.04em}
+.ap-badge{font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(184,134,46,.12);color:var(--gold);font-family:'DM Mono',monospace;font-weight:600}
+.ap-summary{padding:9px 14px;font-size:13px;color:var(--t2);line-height:1.5;font-style:italic;border-bottom:1px solid var(--b)}
+.ap-steps{max-height:230px;overflow-y:auto}
+.ap-step{display:flex;align-items:flex-start;gap:9px;padding:7px 14px;border-bottom:1px solid #f0ede8;transition:background .15s}
+.ap-step:last-child{border-bottom:none}
+.ap-step.pending .si{background:var(--b);color:var(--t3)}
+.ap-step.running{background:rgba(184,134,46,.04)}.ap-step.running .si{background:rgba(184,134,46,.2);color:var(--gold);animation:pulse .8s ease-in-out infinite}
+.ap-step.ok{background:rgba(42,125,70,.03)}.ap-step.ok .si{background:rgba(42,125,70,.15);color:var(--grn)}
+.ap-step.fail{background:rgba(181,48,48,.03)}.ap-step.fail .si{background:rgba(181,48,48,.12);color:var(--red)}
+.si{width:22px;height:22px;min-width:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;margin-top:2px;font-family:'DM Mono',monospace;letter-spacing:-.02em}
+.sb{flex:1;min-width:0}
+.st{font-size:9px;font-weight:600;font-family:'DM Mono',monospace;color:var(--t3);text-transform:uppercase;letter-spacing:.05em}
+.sn{font-size:12px;color:var(--t2);margin-top:1px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr{font-size:10px;color:var(--t3);margin-top:2px;font-family:'DM Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ap-preview{border-top:1px solid var(--b);position:relative;background:#111;line-height:0}
+.ap-preview img{width:100%;display:block;max-height:200px;object-fit:cover;object-position:top}
+.ap-preview-lbl{position:absolute;bottom:6px;left:8px;background:rgba(0,0,0,.65);color:#fff;font-size:9px;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:3px}
+.ap-foot{padding:7px 14px;background:#faf8f5;border-top:1px solid var(--b);font-size:11px;color:var(--t3);min-height:30px;display:flex;align-items:center;gap:6px}
+
+/* ── QUICK ACTIONS ── */
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;width:100%}
+.qb{background:#faf8f5;border:1.5px solid var(--b);border-radius:10px;padding:11px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--t2);transition:all .15s;border:none}
+.qb:hover{background:#fff;color:var(--t);transform:translateY(-1px);box-shadow:var(--sh)}
+.qb svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── STATUS CARDS ── */
+.sc{background:#fff;border:1px solid var(--b);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.scl{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.scv{font-size:16px;font-weight:700;color:var(--t);font-family:'DM Mono',monospace}
+.scv.ok{color:var(--grn)}.scv.err{color:var(--red)}.scv.warn{color:var(--gold)}
+.scs{font-size:11px;color:var(--t3);margin-top:3px}
+
+/* ── CHAT ── */
+#pg-chat{background:var(--bg)}
+.ch-hdr{flex-shrink:0;padding:18px 28px 10px;border-bottom:1px solid var(--b);background:var(--bg)}
+.ch-msgs{flex:1;overflow-y:auto;padding:14px 28px;display:flex;flex-direction:column;gap:12px;min-height:0;scroll-behavior:smooth}
+.ch-msgs::-webkit-scrollbar{width:4px}
+.ch-msgs::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.ch-bar{flex-shrink:0;padding:12px 28px 16px;border-top:1px solid var(--b);display:flex;align-items:center;gap:8px}
+.ch-txt{flex:1;height:42px;background:#fff;border:1.5px solid var(--b);border-radius:10px;padding:0 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--t);outline:none;transition:border-color .15s}
+.ch-txt:focus{border-color:var(--t)}
+.ch-txt::placeholder{color:var(--t3)}
+.ch-mic,.ch-send{width:42px;height:42px;min-width:42px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ch-mic{background:#fff;border:1.5px solid var(--b)}.ch-mic:hover{border-color:var(--t)}
+.ch-mic svg,.ch-send svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ch-mic svg{stroke:var(--t2)}.ch-mic.on{background:var(--gold);border-color:var(--gold)}.ch-mic.on svg{stroke:#fff}
+.ch-send{background:var(--t);border:none}.ch-send:hover{background:#2d2c22}.ch-send svg{stroke:#fff;stroke-width:2}
+.msg{display:flex;gap:8px;max-width:72%}
+.msg.u{align-self:flex-end;flex-direction:row-reverse}
+.mav{width:26px;height:26px;min-width:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:'DM Mono',monospace;align-self:flex-start}
+.msg.a .mav{background:var(--t);color:#fff}.msg.u .mav{background:var(--b);color:var(--t2)}
+.mbod{flex:1;min-width:0}
+.mbub{padding:10px 14px;border-radius:12px;font-size:14px;line-height:1.6;word-break:break-word}
+.msg.a .mbub{background:#fff;border:1px solid var(--b);color:var(--t);border-radius:4px 12px 12px 12px;box-shadow:var(--sh)}
+.msg.u .mbub{background:var(--t);color:#fff;border-radius:12px 4px 12px 12px}
+.mmet{font-size:9px;color:var(--t3);margin-top:3px;font-family:'DM Mono',monospace}
+.msg.u .mmet{text-align:right}
+.itag{display:inline-block;background:rgba(184,134,46,.1);border:1px solid rgba(184,134,46,.25);color:var(--gold);font-size:9px;font-family:'DM Mono',monospace;padding:1px 6px;border-radius:4px;margin-top:3px}
+.typ{display:flex;gap:8px;max-width:72%}
+.typ-bub{padding:10px 14px;background:#fff;border:1px solid var(--b);border-radius:4px 12px 12px 12px;box-shadow:var(--sh);display:flex;gap:4px;align-items:center}
+.d{width:5px;height:5px;border-radius:50%;background:var(--t3);animation:db 1.3s infinite}
+.d:nth-child(2){animation-delay:.2s}.d:nth-child(3){animation-delay:.4s}
+@keyframes db{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-4px)}}
+
+/* ── HISTORY ── */
+.chips{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#fff;border:1.5px solid var(--b);cursor:pointer;color:var(--t2);transition:all .15s}
+.chip:hover,.chip.on{background:var(--t);color:#fff;border-color:var(--t)}
+table.ht{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);border:1px solid var(--b)}
+table.ht th{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);text-align:left;padding:10px 13px;border-bottom:1px solid var(--b);background:#faf8f5}
+table.ht td{padding:10px 13px;border-bottom:1px solid var(--b);font-size:12px;color:var(--t2);vertical-align:middle}
+table.ht tr:last-child td{border-bottom:none}
+table.ht tr:hover td{background:#faf8f5}
+.badge{display:inline-flex;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:600;font-family:'DM Mono',monospace}
+.bm{background:rgba(96,32,176,.1);color:#6020b0}.bs{background:rgba(181,48,48,.1);color:var(--red)}
+.ba{background:rgba(184,134,46,.1);color:var(--gold)}.bd{background:rgba(23,22,15,.08);color:var(--t)}
+.bok{color:var(--grn);font-size:10px;font-family:'DM Mono',monospace}
+.bfl{color:var(--red);font-size:10px;font-family:'DM Mono',monospace}
+.xb{width:24px;height:24px;border-radius:5px;border:1px solid var(--b);background:transparent;cursor:pointer;color:var(--t3);font-size:11px;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+.xb:hover{background:rgba(181,48,48,.08);color:var(--red);border-color:rgba(181,48,48,.3)}
+.hempty{text-align:center;padding:50px 20px;color:var(--t3);font-size:13px}
+
+/* ── SETTINGS ── */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.fr{margin-bottom:16px}
+.fl{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:500;color:var(--t);margin-bottom:6px}
+.fl span{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold)}
+input[type=range]{width:100%;accent-color:var(--t);cursor:pointer;height:4px}
+select{width:100%;background:#faf8f5;border:1.5px solid var(--b);border-radius:9px;padding:9px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--t);outline:none;-webkit-appearance:none;cursor:pointer}
+select:focus{border-color:var(--t)}
+.crow{display:flex;align-items:center;gap:9px;padding:10px 13px;border:1px solid var(--b);border-radius:9px;background:#faf8f5}
+.crow .ci{flex:1}.crow .cn{font-size:14px;font-weight:500;color:var(--t)}
+.crow .cp{font-size:11px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:2px}
+.adf{display:none;flex-direction:column;gap:7px;padding:13px;background:#faf8f5;border:1.5px dashed var(--b2);border-radius:9px;margin-top:9px}
+.adf.open{display:flex}
+
+/* ── SOS MODAL ── */
+#sos-modal{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+#sos-modal.open{display:flex}
+.sos-box{background:#fff;border-radius:18px;padding:32px;text-align:center;width:340px;box-shadow:var(--sh2);border-top:4px solid var(--red)}
+.sos-ico{font-size:40px;margin-bottom:12px;animation:sop 1s infinite}
+@keyframes sop{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.sos-box h2{font-family:'Playfair Display',serif;font-size:21px;color:var(--red);margin-bottom:7px}
+.sos-box p{font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:18px}
+#sos-ct{font-family:'DM Mono',monospace;font-size:42px;color:var(--red);margin-bottom:18px}
+.sos-row{display:flex;gap:9px}
+.sos-row button{flex:1;padding:11px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none}
+#scbtn{background:#faf8f5;color:var(--t);border:1.5px solid var(--b)}
+#ssbtn{background:var(--red);color:#fff}
+
+/* ── TOASTS ── */
+#toasts{position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:#fff;border:1px solid var(--b);border-radius:10px;padding:9px 15px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px;box-shadow:var(--sh2);pointer-events:auto;transform:translateX(110%);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.in{transform:none;opacity:1}
+.toast.ok{border-left:3px solid var(--grn)}.toast.err{border-left:3px solid var(--red)}.toast.info{border-left:3px solid var(--gold)}
+
+/* ── SPINNER ── */
+.spin{width:16px;height:16px;border:2px solid var(--b);border-top-color:var(--t);border-radius:50%;animation:sk .7s linear infinite;display:inline-block;vertical-align:middle;flex-shrink:0}
+@keyframes sk{to{transform:rotate(360deg)}}
+.spin-sm{width:12px;height:12px;border-width:1.5px}
+</style>
+</head>
+<body>
+
+<!-- TITLEBAR -->
+<div id="tb">
+  <div class="tb-logo"><span>zz</span></div>
+  <div class="tb-mid">Voice OS</div>
+  <div class="tb-btns">
+    <button class="c1" onclick="window.zzAPI?.close()"></button>
+    <button class="c2" onclick="window.zzAPI?.minimize()"></button>
+    <button class="c3" onclick="window.zzAPI?.maximize()"></button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav id="nav">
+  <button class="ni on" data-p="dash" title="Dashboard">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+  </button>
+  <button class="ni" data-p="chat" title="Chat">
+    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </button>
+  <button class="ni" data-p="hist" title="History">
+    <svg viewBox="0 0 24 24"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 0 .5-4.5"/><polyline points="3 4 3 11 10 11"/></svg>
+  </button>
+  <button class="ni" data-p="sett" title="Settings">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+  </button>
+  <div class="nspc"></div>
+  <div id="dot"></div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- AUTH PAGE -->
+  <div class="pg on" id="pg-auth">
+    <div class="auth-box">
+      <div class="auth-ico">zz</div>
+      <h1>Zz Voice OS</h1>
+      <p>Intelligent browser automation. Speak or type to control Chrome with AI.</p>
+      <input class="inp" id="an" type="text" placeholder="Your name" maxlength="50" onkeydown="if(event.key==='Enter')doReg()"/>
+      <button class="btn btn-d" id="rbtn" onclick="doReg()" style="width:100%;margin-top:0">Get Started →</button>
+      <div class="auth-note">Have a token? <a href="#" onclick="toggleTK(event)">Paste it here</a></div>
+      <div id="tkw" style="display:none;margin-top:10px">
+        <input class="inp" id="tkf" placeholder="Paste JWT token" style="font-family:'DM Mono',monospace;font-size:11px;margin-bottom:7px"/>
+        <button class="btn btn-d btn-sm" onclick="useTK()" style="width:100%">Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div class="pg" id="pg-dash">
+    <div class="psc">
+      <div class="pgt" id="greet">Welcome</div>
+      <div class="pgs" id="dtime"></div>
+      <div class="dash-layout">
+
+        <!-- Left: voice + command -->
+        <div class="vc">
+          <div class="mic-wrap" id="mwrap">
+            <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+            <button id="micbtn" onclick="toggleMic()">
+              <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+          </div>
+          <div id="mlbl">Click to speak a command</div>
+          <div id="mtx"></div>
+          <div class="vd"></div>
+
+          <!-- Browser status -->
+          <div class="brow-bar">
+            <div class="brow-dot" id="brow-dot"></div>
+            <div id="brow-status" style="font-size:12px;font-weight:600;color:var(--t2);white-space:nowrap">Browser idle</div>
+            <div class="brow-url" id="brow-url"></div>
+            <button class="brow-btn" id="brow-toggle" onclick="toggleBrowser()">Launch</button>
+          </div>
+
+          <!-- Command input -->
+          <div class="lbl" style="width:100%;margin-bottom:6px">Command</div>
+          <div class="cmd-row">
+            <input class="cmd-i" id="cmdi" placeholder='e.g. "open gmail and compose to someone@email.com"' onkeydown="if(event.key==='Enter')runCmd()"/>
+            <button class="run-btn" id="runbtn" onclick="runCmd()">Run →</button>
+            <button class="stop-btn" id="stopbtn" onclick="stopAuto()">■ Stop</button>
+          </div>
+
+          <!-- Automation panel -->
+          <div id="auto-panel">
+            <div class="ap-head">
+              <div class="ap-title">AUTOMATION</div>
+              <div class="ap-badge" id="ap-badge">IDLE</div>
+            </div>
+            <div class="ap-summary" id="ap-summary">Run a command to start automation.</div>
+            <div class="ap-steps" id="ap-steps"></div>
+            <div class="ap-preview" id="ap-preview" style="display:none">
+              <img id="ap-img" src="" alt="Browser view"/>
+              <div class="ap-preview-lbl" id="ap-preview-lbl">live view</div>
+            </div>
+            <div class="ap-foot" id="ap-foot"></div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="lbl" style="width:100%;margin-bottom:7px;margin-top:6px">Quick actions</div>
+          <div class="qa">
+            <button class="qb" onclick="quickRun('open gmail and show my inbox')">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Gmail
+            </button>
+            <button class="qb" onclick="quickRun('search for latest AI news on google')">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              Search
+            </button>
+            <button class="qb" onclick="go('chat')">
+              <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Chat
+            </button>
+            <button class="qb" onclick="quickRun('open github.com and show trending repositories')">
+              <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+              GitHub
+            </button>
+            <button class="qb" onclick="quickRun('open youtube and search for lofi music')">
+              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              YouTube
+            </button>
+            <button class="qb" onclick="openSOS()">
+              <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              SOS
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: status cards -->
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="sc">
+            <div class="scl">API Status</div>
+            <div class="scv" id="sapi">Checking…</div>
+            <div class="scs">worker endpoint</div>
+          </div>
+          <div class="sc">
+            <div class="scl">Browser Engine</div>
+            <div class="scv" style="font-size:13px;font-family:'DM Sans',sans-serif">Playwright/Chromium</div>
+            <div class="scs" id="seng2">Not launched</div>
+          </div>
+          <div class="sc">
+            <div class="scl">Current Page</div>
+            <div class="scv" id="spage" style="font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;word-break:break-all">—</div>
+          </div>
+          <div class="sc">
+            <div class="scl">Account</div>
+            <div class="scv" id="sacc" style="font-size:14px;font-family:'DM Sans',sans-serif">—</div>
+            <div class="scs" id="suid" style="font-family:'DM Mono',monospace;font-size:9px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT PAGE -->
+  <div class="pg" id="pg-chat">
+    <div class="ch-hdr">
+      <div class="pgt">Chat</div>
+      <div style="font-size:12px;color:var(--t2)">Groq · llama-3.3-70b</div>
+    </div>
+    <div class="ch-msgs" id="msgs">
+      <div class="msg a">
+        <div class="mav">ZZ</div>
+        <div class="mbod">
+          <div class="mbub">Hello! I control a real browser using Playwright. Try: <em>"open gmail and compose an email to alex@example.com saying I'll be late"</em></div>
+          <div class="mmet">Zz · now</div>
+        </div>
+      </div>
+    </div>
+    <div class="ch-bar">
+      <button class="ch-mic" id="cmicbtn" onclick="toggleCMic()">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+      </button>
+      <input class="ch-txt" id="ctxt" type="text" placeholder="Message…" onkeydown="if(event.key==='Enter')send()"/>
+      <button class="ch-send" onclick="send()">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="pg" id="pg-hist">
+    <div class="psc">
+      <div class="pgt">History</div>
+      <div class="pgs">Last 20 sessions</div>
+      <div class="chips">
+        <div class="chip on" data-f="ALL" onclick="filt(this)">All</div>
+        <div class="chip" data-f="MESSAGE" onclick="filt(this)">Message</div>
+        <div class="chip" data-f="DESKTOP" onclick="filt(this)">Desktop</div>
+        <div class="chip" data-f="SOS" onclick="filt(this)">SOS</div>
+        <div class="chip" data-f="CHAT" onclick="filt(this)">Chat</div>
+      </div>
+      <div id="hbody"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="pg" id="pg-sett">
+    <div class="psc">
+      <div class="pgt">Settings</div>
+      <div class="pgs">Preferences &amp; emergency contacts</div>
+      <div class="sg">
+        <div class="card">
+          <div class="lbl" style="margin-bottom:16px">Voice</div>
+          <div class="fr">
+            <div class="fl">Speed <span id="spl">1.0×</span></div>
+            <input type="range" id="pspd" min="0.5" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('spl').textContent=this.value+'×'"/>
+          </div>
+          <div class="fr">
+            <div class="fl">Language</div>
+            <select id="plng">
+              <option value="en-US">English (US)</option>
+              <option value="hi-IN">Hindi</option>
+              <option value="es-ES">Spanish</option>
+              <option value="fr-FR">French</option>
+              <option value="de-DE">German</option>
+            </select>
+          </div>
+          <button class="btn btn-d btn-sm" onclick="savePrefs()">Save preferences</button>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div class="lbl" style="margin-bottom:0">Emergency Contacts</div>
+            <button class="btn btn-o btn-sm" onclick="toggleAF()">+ Add</button>
+          </div>
+          <div class="adf" id="adf">
+            <input class="inp" id="acn" placeholder="Name"/>
+            <input class="inp" id="acp" placeholder="Phone (+1234567890)"/>
+            <div style="display:flex;gap:7px">
+              <button class="btn btn-d btn-sm" onclick="addCt()">Add</button>
+              <button class="btn btn-o btn-sm" onclick="toggleAF()">Cancel</button>
+            </div>
+          </div>
+          <div id="ctlist" style="display:flex;flex-direction:column;gap:7px;margin-top:7px"></div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-weight:600;font-size:14px" id="aname">—</div>
+            <div style="font-size:9px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:2px" id="auid2">—</div>
+          </div>
+          <button class="btn btn-r btn-sm" onclick="logout()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #main -->
+
+<!-- SOS MODAL -->
+<div id="sos-modal">
+  <div class="sos-box">
+    <div class="sos-ico">🆘</div>
+    <h2>Emergency SOS</h2>
+    <p>Your location will be sent to all emergency contacts. You can cancel within the countdown.</p>
+    <div id="sos-ct">10</div>
+    <div class="sos-row">
+      <button id="scbtn" onclick="cancelSOS()">✕ Cancel</button>
+      <button id="ssbtn" onclick="sendSOS()">Send Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<script>
+'use strict';
+
+// ─── CONFIG ────────────────────────────────────────────────────────────────────
+const API = 'https://voice-os.vishwajeetadkine705.workers.dev';
+const E = !!window.zzAPI; // true when running inside Electron
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let token = null, user = null, hist = [], hflt = 'ALL';
+let voiceOn = false, cVoiceOn = false, rec = null;
+let sosT = null, sosSec = 10;
+let autoRunning = false;
+let browPollId = null;
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+(function boot() {
+  const t = localStorage.getItem('zz_t');
+  const u = localStorage.getItem('zz_u');
+  if (t && u) { token = t; user = JSON.parse(u); enter(); }
+  tick();
+  setInterval(tick, 30000);
+  if (E) setupElectronEvents();
+})();
+
+function tick() {
+  const n = new Date(), h = n.getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  $t('greet', g + (user ? ', ' + user.name : ''));
+  $t('dtime', n.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    + '  ·  ' + n.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+}
+
+// ─── ELECTRON IPC EVENTS ──────────────────────────────────────────────────────
+function setupElectronEvents() {
+  window.zzAPI.onAutomationStep(function(d) {
+    // Mark previous steps done, current running
+    for (let i = 0; i < d.total; i++) {
+      const row = document.getElementById('step-' + i);
+      if (!row) continue;
+      if (i < d.step && row.className === 'ap-step pending') row.className = 'ap-step ok';
+      if (i === d.step) row.className = 'ap-step running';
+    }
+    foot('<span class="spin spin-sm"></span>&nbsp; Step ' + (d.step + 1) + '/' + d.total + ': ' + esc(d.note || d.type));
+  });
+
+  window.zzAPI.onAutomationStepResult(function(d) {
+    const row = document.getElementById('step-' + d.step);
+    if (row) {
+      row.className = 'ap-step ' + (d.ok ? 'ok' : 'fail');
+      const sr = row.querySelector('.sr');
+      if (sr) sr.textContent = (d.message || d.error || '').slice(0, 90);
+    }
+    if (d.screenshot && d.screenshot.base64) showPreview(d.screenshot);
+  });
+
+  window.zzAPI.onAutomationDone(function(d) {
+    if (!autoRunning) return; // already handled
+    setAutoRunning(false);
+    foot(d.ok ? 'All steps completed.' : 'Stopped — see steps above for details.');
+    toast(d.ok ? 'Automation complete' : 'Automation stopped', d.ok ? 'ok' : 'info');
+    tts(d.ok ? 'Done.' : 'Automation stopped.');
+    refreshBrowserStatus();
+  });
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
+function go(id) {
+  document.querySelectorAll('.pg').forEach(function(p) { p.classList.remove('on'); });
+  document.querySelectorAll('.ni[data-p]').forEach(function(b) { b.classList.remove('on'); });
+  const pg = document.getElementById('pg-' + id);
+  const btn = document.querySelector('.ni[data-p="' + id + '"]');
+  if (pg) pg.classList.add('on');
+  if (btn) btn.classList.add('on');
+  if (id === 'hist') loadHistory();
+  if (id === 'sett') loadSettings();
+}
+document.querySelectorAll('.ni[data-p]').forEach(function(b) {
+  b.addEventListener('click', function() { go(b.dataset.p); });
+});
+
+// ─── FETCH HELPERS ────────────────────────────────────────────────────────────
+async function ftch(url, opts, ms) {
+  ms = ms || 15000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(function() { ctrl.abort(); }, ms);
+  try {
+    const r = await fetch(url, Object.assign({}, opts, { signal: ctrl.signal }));
+    return r;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function api(path, opts) {
+  opts = opts || {};
+  const h = { 'Content-Type': 'application/json' };
+  if (token) h.Authorization = 'Bearer ' + token;
+  const r = await ftch(API + path, {
+    method: opts.method || 'GET',
+    headers: h,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  }, opts.timeout || 15000);
+  const d = await r.json().catch(function() { return {}; });
+  if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status);
+  return d;
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+function mkLocal(name) {
+  const n = (name || 'User').trim().slice(0, 50) || 'User';
+  token = 'local-session-token';
+  user = { id: 'local-' + Math.random().toString(36).slice(2, 9), name: n };
+  localStorage.setItem('zz_t', token);
+  localStorage.setItem('zz_u', JSON.stringify(user));
+  enter();
+}
+
+async function doReg() {
+  const name = document.getElementById('an').value.trim();
+  if (!name) { toast('Enter your name', 'err'); return; }
+  const btn = document.getElementById('rbtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>&nbsp;Creating…';
+  try {
+    const r = await ftch(API + '/api/v1/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    }, 6000);
+    const d = await r.json();
+    if (!r.ok || !d.token) throw new Error(d.error || 'Registration failed');
+    token = d.token;
+    user = { id: d.userId, name: d.name };
+    localStorage.setItem('zz_t', token);
+    localStorage.setItem('zz_u', JSON.stringify(user));
+    enter();
+    toast('Welcome, ' + d.name + '!', 'ok');
+  } catch (ex) {
+    mkLocal(name);
+    toast('Started in local mode — ' + ex.message, 'info');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Get Started →';
+  }
+}
+
+function toggleTK(e) {
+  e.preventDefault();
+  const w = document.getElementById('tkw');
+  w.style.display = w.style.display === 'none' ? 'block' : 'none';
+}
+
+function useTK() {
+  const t = document.getElementById('tkf').value.trim();
+  if (!t) { toast('Paste a token', 'err'); return; }
+  try {
+    const parts = t.split('.');
+    const p = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    token = t;
+    user = { id: p.sub, name: p.name || 'User' };
+    localStorage.setItem('zz_t', token);
+    localStorage.setItem('zz_u', JSON.stringify(user));
+    enter();
+    toast('Connected!', 'ok');
+  } catch (ex) {
+    toast('Invalid token', 'err');
+  }
+}
+
+function logout() {
+  localStorage.removeItem('zz_t');
+  localStorage.removeItem('zz_u');
+  token = null; user = null;
+  document.getElementById('nav').style.visibility = 'hidden';
+  go('auth');
+  toast('Signed out', 'info');
+}
+
+function enter() {
+  document.getElementById('nav').style.visibility = 'visible';
+  go('dash');
+  checkConn();
+  loadDash();
+  if (E) startBrowPoll();
+}
+
+// ─── CONNECTION CHECK ─────────────────────────────────────────────────────────
+async function checkConn() {
+  try {
+    await ftch(API + '/health', {}, 4000);
+    document.getElementById('dot').className = 'on';
+    $t('sapi', 'Connected');
+    document.getElementById('sapi').className = 'scv ok';
+  } catch {
+    document.getElementById('dot').className = 'off';
+    $t('sapi', 'Offline');
+    document.getElementById('sapi').className = 'scv err';
+  }
+}
+
+// ─── BROWSER STATUS ───────────────────────────────────────────────────────────
+function startBrowPoll() {
+  clearInterval(browPollId);
+  refreshBrowserStatus();
+  browPollId = setInterval(refreshBrowserStatus, 4000);
+}
+
+async function refreshBrowserStatus() {
+  if (!E) return;
+  try {
+    const s = await window.zzAPI.browserStatus();
+    const dot = document.getElementById('brow-dot');
+    const stat = document.getElementById('brow-status');
+    const tog = document.getElementById('brow-toggle');
+    if (s.ready) {
+      dot.className = 'brow-dot ready';
+      stat.textContent = 'Browser ready';
+      tog.textContent = 'Close';
+      $t('seng2', 'Chromium running');
+      const ps = await window.zzAPI.getPageState().catch(function() { return null; });
+      if (ps && ps.url && ps.url !== 'about:blank') {
+        const clean = ps.url.replace(/^https?:\/\//, '');
+        document.getElementById('brow-url').textContent = clean;
+        $t('spage', clean.slice(0, 50));
+      }
+    } else if (s.status === 'launching') {
+      dot.className = 'brow-dot busy';
+      stat.textContent = 'Launching…';
+      tog.textContent = 'Wait…';
+    } else {
+      dot.className = 'brow-dot';
+      stat.textContent = 'Browser idle';
+      tog.textContent = 'Launch';
+      document.getElementById('brow-url').textContent = '';
+      $t('spage', '—');
+      $t('seng2', 'Not launched');
+    }
+  } catch (ex) {
+    // Silent — polling
+  }
+}
+
+async function toggleBrowser() {
+  if (!E) { toast('Requires Electron app', 'info'); return; }
+  const s = await window.zzAPI.browserStatus();
+  if (s.ready) {
+    await window.zzAPI.browserClose();
+    toast('Browser closed', 'info');
+  } else {
+    document.getElementById('brow-toggle').textContent = 'Launching…';
+    const r = await window.zzAPI.browserLaunch();
+    if (!r.ok) toast('Launch failed: ' + r.error, 'err');
+    else toast('Browser launched', 'ok');
+  }
+  await refreshBrowserStatus();
+}
+
+// ─── DASHBOARD LOAD ───────────────────────────────────────────────────────────
+function loadDash() {
+  tick();
+  $t('sacc', user ? user.name : '—');
+  $t('suid', user ? user.id.slice(0, 30) : '');
+  $t('aname', user ? user.name : '—');
+  $t('auid2', user ? user.id : '');
+}
+
+// ─── LOCAL FALLBACK PLAN (no network needed) ──────────────────────────────────
+function buildLocalPlan(command) {
+  const q = command.toLowerCase();
+  const steps = [];
+  const sites = {
+    'gmail': 'https://mail.google.com',
+    'google mail': 'https://mail.google.com',
+    'youtube': 'https://youtube.com',
+    'github': 'https://github.com',
+    'chatgpt': 'https://chatgpt.com',
+    'claude': 'https://claude.ai',
+    'figma': 'https://figma.com',
+    'notion': 'https://notion.so',
+    'calendar': 'https://calendar.google.com',
+    'google calendar': 'https://calendar.google.com',
+    'drive': 'https://drive.google.com',
+    'google drive': 'https://drive.google.com',
+    'docs': 'https://docs.google.com',
+    'twitter': 'https://twitter.com',
+    'linkedin': 'https://linkedin.com',
+    'reddit': 'https://reddit.com',
+    'google': 'https://google.com',
+    'vercel': 'https://vercel.com',
+    'supabase': 'https://supabase.com',
+    'stackoverflow': 'https://stackoverflow.com',
+    'stack overflow': 'https://stackoverflow.com',
+  };
+  for (const [k, url] of Object.entries(sites)) {
+    if (q.includes(k)) {
+      steps.push({ type: 'navigate', url: url, note: 'Open ' + k });
+      steps.push({ type: 'wait', ms: 1500, note: 'Wait for page load' });
+      break;
+    }
+  }
+  const urlM = q.match(/(?:go to|open|visit|navigate to)\s+(https?:\/\/\S+)/);
+  if (urlM && !steps.length) steps.push({ type: 'navigate', url: urlM[1], note: 'Navigate to URL' });
+  if (!steps.length) {
+    const sM = q.match(/(?:search|find|look up)\s+(?:for\s+)?(.+)/);
+    const sq = sM ? sM[1].trim() : command;
+    steps.push({ type: 'navigate', url: 'https://www.google.com/search?q=' + encodeURIComponent(sq), note: 'Search: ' + sq });
+  }
+  return { shouldAutomate: true, summary: steps[0].note, intent: 'NAVIGATE', steps: steps };
+}
+
+// ─── AUTOMATION ENGINE ────────────────────────────────────────────────────────
+async function runAutomation(command) {
+  if (autoRunning) { toast('Already running', 'info'); return; }
+  setAutoRunning(true);
+
+  const panel = document.getElementById('auto-panel');
+  panel.classList.add('show');
+  $t('ap-summary', 'Planning…');
+  document.getElementById('ap-steps').innerHTML =
+    '<div style="padding:10px 14px;font-size:12px;color:var(--t3);display:flex;align-items:center;gap:7px"><span class="spin spin-sm"></span> Asking AI to plan steps…</div>';
+  $t('ap-badge', 'PLANNING');
+  foot('');
+  document.getElementById('ap-preview').style.display = 'none';
+
+  // 1. Get DOM state (text only) from Playwright if browser is open
+  let pageState = null;
+  if (E) {
+    try { pageState = await window.zzAPI.getPageState(); } catch (ex) {}
+  }
+
+  // 2. Get plan — try direct Groq call from Node first (Electron), then worker fallback
+  foot('<span class="spin spin-sm"></span>&nbsp; Planning…');
+  let plan = null;
+
+  if (E && window.zzAPI.planCommand) {
+    try {
+      plan = await window.zzAPI.planCommand({ command: command, pageState: pageState });
+    } catch (ex) {
+      console.warn('planCommand failed:', ex.message);
+      plan = null;
+    }
+  }
+
+  // Web fallback — call the worker
+  if (!plan) {
+    try {
+      plan = await api('/api/v1/desktop/command', {
+        method: 'POST',
+        body: { command: command, pageState: pageState },
+        timeout: 18000,
+      });
+    } catch (ex) {
+      console.warn('Worker planning failed:', ex.message);
+      plan = null;
+    }
+  }
+
+  // Last resort: build a local plan instantly with no network
+  if (!plan || !plan.shouldAutomate || !plan.steps || !plan.steps.length) {
+    if (plan && !plan.shouldAutomate) {
+      $t('ap-summary', plan.summary || 'No automation needed.');
+      document.getElementById('ap-steps').innerHTML = '';
+      $t('ap-badge', 'DONE');
+      foot('No browser steps were generated.');
+      tts(plan.summary || '');
+      setAutoRunning(false);
+      return;
+    }
+    plan = buildLocalPlan(command);
+    foot('Using local fallback plan.');
+  }
+
+  // 3. Show the plan
+  renderPlan(plan);
+  tts('Starting: ' + plan.summary);
+  foot('Executing…');
+
+  // 4. Non-Electron: open URLs in new tabs, that's all we can do
+  if (!E) {
+    for (const step of plan.steps) {
+      if (step.type === 'navigate' || step.type === 'new_tab') {
+        window.open(step.url, '_blank', 'noopener');
+        toast('Opened ' + step.url, 'info');
+        await sleep(300);
+      }
+    }
+    $t('ap-badge', 'DONE');
+    foot('Opened tabs. Full automation requires the Electron desktop app.');
+    setAutoRunning(false);
+    return;
+  }
+
+  // 5. Electron: execute via Playwright — runAutomationPlan streams events AND returns results
+  try {
+    const results = await window.zzAPI.runAutomationPlan({ steps: plan.steps });
+    // Catch-up: update any steps whose events may have been missed
+    if (autoRunning && Array.isArray(results)) {
+      const allOk = results.every(function(r) { return r.ok !== false; });
+      results.forEach(function(r, i) {
+        const row = document.getElementById('step-' + i);
+        if (row && row.className === 'ap-step pending') {
+          row.className = 'ap-step ' + (r.ok ? 'ok' : 'fail');
+          const sr = row.querySelector('.sr');
+          if (sr) sr.textContent = (r.message || r.error || '').slice(0, 90);
+        }
+        if (r.screenshot && r.screenshot.base64) showPreview(r.screenshot);
+      });
+      setAutoRunning(false);
+      $t('ap-badge', allOk ? 'DONE' : 'FAILED');
+      foot(allOk ? 'All steps completed.' : 'Stopped — see steps above.');
+      toast(allOk ? 'Automation complete' : 'Automation stopped', allOk ? 'ok' : 'info');
+      tts(allOk ? 'Done.' : 'Automation stopped.');
+    }
+  } catch (ex) {
+    setAutoRunning(false);
+    foot('Execution error: ' + ex.message);
+    toast('Error: ' + ex.message, 'err');
+  }
+}
+
+function setAutoRunning(val) {
+  autoRunning = val;
+  document.getElementById('runbtn').style.display = val ? 'none' : 'block';
+  document.getElementById('stopbtn').style.display = val ? 'block' : 'none';
+}
+
+function renderPlan(plan) {
+  $t('ap-summary', plan.summary || '');
+  $t('ap-badge', plan.intent || 'AUTOMATION');
+  const icons = {
+    navigate: 'NAV', click: 'CLK', fill: 'TYP', type: 'TYP', press_key: 'KEY',
+    keypress: 'KEY', scroll: 'SCR', wait: 'WAIT', wait_for: 'WAIT',
+    wait_navigation: 'WAIT', evaluate: 'JS', extract_text: 'READ',
+    select_option: 'SEL', hover: 'HOV', go_back: 'BCK', go_forward: 'FWD',
+    new_tab: 'TAB', close_tab: 'CLZ',
+  };
+  document.getElementById('ap-steps').innerHTML = plan.steps.map(function(s, i) {
+    const ic = icons[s.type] || s.type.slice(0, 3).toUpperCase();
+    const label = s.note || s.target || s.url || s.value || s.key || '';
+    return '<div class="ap-step pending" id="step-' + i + '">' +
+      '<div class="si">' + ic + '</div>' +
+      '<div class="sb">' +
+        '<div class="st">' + s.type.replace(/_/g, ' ') + '</div>' +
+        '<div class="sn">' + esc(label) + '</div>' +
+        '<div class="sr"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function showPreview(ss) {
+  if (!ss || !ss.base64) return;
+  document.getElementById('ap-preview').style.display = 'block';
+  document.getElementById('ap-img').src = 'data:' + ss.mimeType + ';base64,' + ss.base64;
+  const url = (ss.url || '').replace(/^https?:\/\//, '').slice(0, 55);
+  $t('ap-preview-lbl', url || 'live view');
+  if (ss.url) $t('spage', url.slice(0, 50));
+}
+
+function stopAuto() {
+  if (E) window.zzAPI.abortAutomation();
+  setAutoRunning(false);
+  $t('ap-badge', 'STOPPED');
+  foot('Stopped by user.');
+  toast('Stopped', 'info');
+}
+
+async function runCmd(preset) {
+  const inp = document.getElementById('cmdi');
+  const cmd = preset || inp.value.trim();
+  if (!cmd) return;
+  if (!preset) inp.value = '';
+
+  const low = cmd.toLowerCase();
+
+  // Quick local shortcuts
+  const mm = low.match(/^(?:message|text|send\s+message\s+to?)\s+(\S+)\s+(.+)/);
+  if (mm) {
+    try {
+      const d = await api('/api/v1/message', { method: 'POST', body: { contact: mm[1], message: mm[2] } });
+      toast(d.message, 'ok'); tts(d.message);
+    } catch (ex) { toast(ex.message, 'err'); }
+    return;
+  }
+  if (/what.*(time|date|day)/.test(low)) {
+    const msg = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    toast(msg, 'info'); tts(msg); return;
+  }
+  const nv = low.match(/^(?:go to|open|show)\s+(chat|history|settings|dashboard)$/);
+  if (nv) {
+    go({ chat: 'chat', history: 'hist', settings: 'sett', dashboard: 'dash' }[nv[1]]);
+    return;
+  }
+
+  await runAutomation(cmd);
+}
+
+function quickRun(cmd) {
+  document.getElementById('cmdi').value = cmd;
+  runCmd(cmd);
+}
+
+// ─── MICROPHONE ───────────────────────────────────────────────────────────────
+function getMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Speech recognition requires Chrome', 'err'); return null; }
+  const r = new SR();
+  r.lang = document.getElementById('plng') ? document.getElementById('plng').value : 'en-US';
+  r.continuous = false; r.interimResults = false; r.maxAlternatives = 1;
+  return r;
+}
+
+function toggleMic() {
+  if (voiceOn) { stopMic(); return; }
+  const r = getMic(); if (!r) return;
+  rec = r; voiceOn = true;
+  document.getElementById('micbtn').classList.add('live');
+  document.getElementById('mwrap').classList.add('live');
+  $t('mlbl', 'Listening…');
+  r.onresult = async function(ev) {
+    const t = ev.results[0][0].transcript.trim();
+    $t('mtx', '"' + t + '"');
+    $t('mlbl', 'Processing…');
+    stopMic();
+    document.getElementById('cmdi').value = t;
+    await runCmd();
+    $t('mlbl', 'Click to speak a command');
+    $t('mtx', '');
+  };
+  r.onerror = function(ev) {
+    stopMic();
+    const m = { 'not-allowed': 'Microphone blocked.', 'no-speech': 'No speech detected.', 'audio-capture': 'No microphone found.' };
+    toast(m[ev.error] || 'Mic error: ' + ev.error, 'err');
+  };
+  r.onend = function() { stopMic(); };
+  r.start();
+}
+
+function stopMic() {
+  voiceOn = false;
+  if (rec) { try { rec.stop(); } catch (ex) {} rec = null; }
+  const mb = document.getElementById('micbtn');
+  const mw = document.getElementById('mwrap');
+  if (mb) mb.classList.remove('live');
+  if (mw) mw.classList.remove('live');
+  $t('mlbl', 'Click to speak a command');
+}
+
+// ─── TTS ──────────────────────────────────────────────────────────────────────
+function tts(text) {
+  if (!window.speechSynthesis || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = parseFloat((document.getElementById('pspd') || { value: '1' }).value);
+  u.lang = (document.getElementById('plng') || { value: 'en-US' }).value;
+  speechSynthesis.speak(u);
+}
+
+// ─── CHAT ─────────────────────────────────────────────────────────────────────
+function addMsg(role, text, intent) {
+  const list = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = 'msg ' + (role === 'ai' ? 'a' : 'u');
+  const t = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  d.innerHTML = '<div class="mav">' + (role === 'ai' ? 'ZZ' : 'U') + '</div>' +
+    '<div class="mbod">' +
+      '<div class="mbub">' + esc(text) + '</div>' +
+      (intent ? '<div><span class="itag">' + esc(intent) + '</span></div>' : '') +
+      '<div class="mmet">' + (role === 'ai' ? 'Zz' : 'You') + ' · ' + t + '</div>' +
+    '</div>';
+  list.appendChild(d);
+  list.scrollTop = list.scrollHeight;
+}
+
+function addTyping() {
+  const list = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.id = 'typing'; d.className = 'typ';
+  d.innerHTML = '<div class="mav" style="background:var(--t);color:#fff;min-width:26px;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:\'DM Mono\',monospace">ZZ</div>' +
+    '<div class="typ-bub"><div class="d"></div><div class="d"></div><div class="d"></div></div>';
+  list.appendChild(d);
+  list.scrollTop = list.scrollHeight;
+}
+
+async function send() {
+  const inp = document.getElementById('ctxt');
+  const t = inp.value.trim();
+  if (!t) return;
+  inp.value = '';
+  addMsg('user', t);
+  addTyping();
+  try {
+    const d = await api('/api/v1/chat', { method: 'POST', body: { query: t } });
+    document.getElementById('typing').remove();
+    addMsg('ai', d.response, d.intent);
+    tts(d.response);
+  } catch (ex) {
+    const tyEl = document.getElementById('typing');
+    if (tyEl) tyEl.remove();
+    addMsg('ai', 'Error: ' + ex.message);
+    toast(ex.message, 'err');
+  }
+}
+
+function toggleCMic() {
+  const btn = document.getElementById('cmicbtn');
+  if (cVoiceOn) { if (rec) { try { rec.stop(); } catch (ex) {} } cVoiceOn = false; btn.classList.remove('on'); return; }
+  const r = getMic(); if (!r) return;
+  rec = r; cVoiceOn = true; btn.classList.add('on');
+  r.onresult = function(ev) { document.getElementById('ctxt').value = ev.results[0][0].transcript.trim(); cVoiceOn = false; btn.classList.remove('on'); send(); };
+  r.onerror = function() { cVoiceOn = false; btn.classList.remove('on'); };
+  r.onend = function() { cVoiceOn = false; btn.classList.remove('on'); };
+  r.start();
+}
+
+// ─── HISTORY ──────────────────────────────────────────────────────────────────
+async function loadHistory() {
+  document.getElementById('hbody').innerHTML = '<div style="text-align:center;padding:40px"><span class="spin"></span></div>';
+  try {
+    const r = await api('/api/v1/history');
+    hist = Array.isArray(r) ? r : [];
+    renderH();
+  } catch (ex) { toast(ex.message, 'err'); }
+}
+
+function filt(el) {
+  document.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('on'); });
+  el.classList.add('on');
+  hflt = el.dataset.f;
+  renderH();
+}
+
+function renderH() {
+  const data = hflt === 'ALL' ? hist : hist.filter(function(r) { return r.command_type === hflt; });
+  const el = document.getElementById('hbody');
+  if (!data.length) {
+    el.innerHTML = '<div class="hempty"><div style="font-size:34px;margin-bottom:8px;opacity:.3">📭</div>No sessions found</div>';
+    return;
+  }
+  const bc = { MESSAGE: 'bm', SOS: 'bs', CHAT: 'ba', DESKTOP: 'bd' };
+  el.innerHTML = '<table class="ht"><thead><tr><th>Time</th><th>Type</th><th>Command</th><th>Outcome</th><th></th></tr></thead><tbody>' +
+    data.map(function(r) {
+      return '<tr>' +
+        '<td style="font-family:\'DM Mono\',monospace;font-size:9px;white-space:nowrap">' + new Date(r.created_at).toLocaleString() + '</td>' +
+        '<td><span class="badge ' + (bc[r.command_type] || '') + '">' + r.command_type + '</span></td>' +
+        '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(r.command_text) + '</td>' +
+        '<td><span class="' + (r.outcome === 'success' ? 'bok' : 'bfl') + '">' + r.outcome + '</span></td>' +
+        '<td><button class="xb" onclick="delH(\'' + r.id + '\')">✕</button></td>' +
+      '</tr>';
+    }).join('') + '</tbody></table>';
+}
+
+async function delH(id) {
+  try {
+    await fetch(API + '/api/v1/history/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+    hist = hist.filter(function(r) { return r.id !== id; });
+    renderH();
+    toast('Deleted', 'info');
+  } catch (ex) { toast(ex.message, 'err'); }
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+async function loadSettings() {
+  $t('aname', user ? user.name : '—');
+  $t('auid2', user ? user.id : '—');
+  try {
+    const p = await api('/api/v1/settings');
+    const spd = document.getElementById('pspd');
+    const spl = document.getElementById('spl');
+    const lng = document.getElementById('plng');
+    if (spd) spd.value = p.voice_speed || 1;
+    if (spl) spl.textContent = (p.voice_speed || 1) + '×';
+    if (lng) lng.value = p.language || 'en-US';
+  } catch (ex) {}
+  try {
+    const c = await api('/api/v1/settings/emergency-contacts');
+    renderCts(c);
+  } catch (ex) {}
+}
+
+function renderCts(cts) {
+  const el = document.getElementById('ctlist');
+  if (!cts || !cts.length) {
+    el.innerHTML = '<div style="color:var(--t3);font-size:12px;padding:5px 0">No emergency contacts added.</div>';
+    return;
+  }
+  el.innerHTML = cts.map(function(c) {
+    return '<div class="crow">' +
+      '<div class="ci"><div class="cn">' + esc(c.name) + '</div><div class="cp">' + esc(c.phone_number) + '</div></div>' +
+      '<button class="xb" onclick="delCt(\'' + c.id + '\')">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+async function savePrefs() {
+  try {
+    await api('/api/v1/settings', { method: 'POST', body: {
+      voice_speed: parseFloat(document.getElementById('pspd').value),
+      language: document.getElementById('plng').value,
+    }});
+    toast('Saved', 'ok');
+  } catch (ex) { toast(ex.message, 'err'); }
+}
+
+function toggleAF() { document.getElementById('adf').classList.toggle('open'); }
+
+async function addCt() {
+  const n = document.getElementById('acn').value.trim();
+  const p = document.getElementById('acp').value.trim();
+  if (!n || !p) { toast('Name and phone required', 'err'); return; }
+  try {
+    await api('/api/v1/settings/emergency-contacts', { method: 'POST', body: { name: n, phone_number: p } });
+    document.getElementById('acn').value = '';
+    document.getElementById('acp').value = '';
+    document.getElementById('adf').classList.remove('open');
+    toast('Contact added', 'ok');
+    const c = await api('/api/v1/settings/emergency-contacts');
+    renderCts(c);
+  } catch (ex) { toast(ex.message, 'err'); }
+}
+
+async function delCt(id) {
+  try {
+    await fetch(API + '/api/v1/settings/emergency-contacts/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+    toast('Removed', 'info');
+    const c = await api('/api/v1/settings/emergency-contacts');
+    renderCts(c);
+  } catch (ex) { toast(ex.message, 'err'); }
+}
+
+// ─── SOS ──────────────────────────────────────────────────────────────────────
+function openSOS() {
+  document.getElementById('sos-modal').classList.add('open');
+  sosSec = 10;
+  $t('sos-ct', '10');
+  sosT = setInterval(function() {
+    sosSec--;
+    $t('sos-ct', String(sosSec));
+    if (sosSec <= 0) { clearInterval(sosT); sendSOS(); }
+  }, 1000);
+}
+
+async function sendSOS() {
+  clearInterval(sosT);
+  document.getElementById('sos-modal').classList.remove('open');
+  let lat = 0, lon = 0;
+  try {
+    const pos = await new Promise(function(res, rej) { navigator.geolocation.getCurrentPosition(res, rej, { timeout: 4000 }); });
+    lat = pos.coords.latitude; lon = pos.coords.longitude;
+  } catch (ex) {}
+  try {
+    const d = await api('/api/v1/sos', { method: 'POST', body: { latitude: lat, longitude: lon } });
+    toast(d.message, 'ok'); tts('SOS sent.');
+  } catch (ex) { toast(ex.message, 'err'); }
+}
+
+function cancelSOS() {
+  clearInterval(sosT);
+  document.getElementById('sos-modal').classList.remove('open');
+  api('/api/v1/sos/cancel', { method: 'POST' }).then(function() { toast('SOS cancelled', 'info'); }).catch(function() {});
+}
+
+// ─── UTILITIES ────────────────────────────────────────────────────────────────
+const sleep = function(ms) { return new Promise(function(r) { setTimeout(r, ms); }); };
+
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function $t(id, v) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = v;
+}
+
+function foot(html) {
+  const f = document.getElementById('ap-foot');
+  if (f) f.innerHTML = html;
+}
+
+function toast(msg, type) {
+  type = type || 'info';
+  const icons = { ok: '✓', err: '✕', info: '●' };
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = (icons[type] || '●') + ' ' + msg;
+  document.getElementById('toasts').appendChild(el);
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() { el.classList.add('in'); });
+  });
+  setTimeout(function() {
+    el.classList.remove('in');
+    setTimeout(function() { el.remove(); }, 350);
+  }, 3500);
+}
+</script>
+</body>
+</html>

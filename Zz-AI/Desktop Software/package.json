@@ -1,0 +1,33 @@
+{
+  "name": "zz-voice-os",
+  "version": "2.0.0",
+  "description": "Zz Voice OS — Browser Automation Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "install-browser": "npx playwright install chromium",
+    "postinstall": "npx playwright install chromium",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.zzai.voiceos",
+    "productName": "Zz Voice OS",
+    "directories": { "output": "dist" },
+    "extraResources": [
+      { "from": "node_modules/playwright", "to": "playwright" }
+    ],
+    "win": { "target": "nsis", "icon": "assets/icon.ico" },
+    "mac": { "target": "dmg", "icon": "assets/icon.icns" },
+    "linux": { "target": "AppImage" }
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "playwright": "^1.40.0"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
+  }
+}
