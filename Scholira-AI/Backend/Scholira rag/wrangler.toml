@@ -1,0 +1,6 @@
+name = "scholara-rag-worker"
+main = "worker/index.js"
+compatibility_date = "2024-01-01"
+
+# Wrangler automatically bundles index.js + scholarships.js together.
+# No build step needed — just run: wrangler deploy
